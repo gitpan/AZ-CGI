@@ -1,0 +1,366 @@
+=head1 NAME
+
+AZ::CGI - HTML forms and cookies parser
+
+=head1 SYNOPSIS
+
+  use AZ::CGI;
+
+  $cgi = AZ::CGI->new();
+
+  $cgi->set_GET(
+      -incEmpty => $bool,         # No
+      -cutNull  => $bool,         # Yes
+      -maxLoops => $quantity      # 128
+  );
+
+  $cgi->set_COOKIE(
+      -incEmpty => $bool,         # No
+      -cutNull  => $bool,         # Yes
+      -maxLoops => $quantity      # 128
+  );
+
+  $cgi->set_POST(
+      -incEmpty   => $bool,       # No
+      -cutNull    => $bool,       # Yes
+      -maxLoops   => $quantity,   # 256
+      -maxSize    => $size,       # 2Mb
+      -maxKeySize => $size,       # 128b
+      -maxValSize => $size        # 256Kb
+  );
+
+  $cgi->set_MULTI(
+      -incEmpty   => $bool,       # No
+      -cutNull    => $bool,       # Yes
+      -maxLoops   => $quantity,   # 256
+      -maxSize    => $size,       # 16Mb
+      -maxKeySize => $size,       # 128b
+      -maxValSize => $size,       # 256Kb
+      -maxFiles   => $quantity    # 16
+  );
+
+  $cgi->GET($key,$number);
+  $cgi->GET_is($key,$number);
+  $cgi->GET_size($key);
+  $cgi->GET_keys();
+
+  $cgi->COOKIE($key);
+  $cgi->COOKIE_is($key);
+  $cgi->COOKIE_keys();
+
+  $cgi->POST($key,$number);
+  $cgi->POST_is($key,$number);
+  $cgi->POST_size($key);
+  $cgi->POST_keys();
+
+  $cgi->FILE($key,$number)->name();
+  $cgi->FILE($key,$number)->base();
+  $cgi->FILE($key,$number)->temp();
+  $cgi->FILE($key,$number)->mime();
+  $cgi->FILE($key,$number)->size();
+  $cgi->FILE_is($key,$number);
+  $cgi->FILE_size($key);
+  $cgi->FILE_keys();
+
+  $cgi->env($key);
+  $cgi->uri_encode($string);
+  $cgi->uri_decode($string);
+
+=head1 DESCRIPTION
+
+This is Perl module for fastest and full securely parsing CGI query.
+POST query loading into memory only in parts, and, for this reason,
+module using little memory for parsing.
+
+=head1 METHODS
+
+=over 4
+
+=item new()
+
+The constructor method instantiates a new AZ::CGI object.
+
+=item DESTROY()
+
+The destructor method cleaning up memory and deleting existings
+temporary files.
+
+=item set_GET(-PARAM => VALUE, ...)
+
+=item set_COOKIE(...)
+
+=item set_POST(...)
+
+=item set_MULTI(...)
+
+Methods for changing settings of GET, COOKIE, POST and
+POST/multipart query's parsing.
+
+Note: For a cancellation of action of -maxLoops, -maxSize,
+-maxKeySize, -maxValSize and -maxFiles parameters you can using value -1.
+
+=over 4
+
+=item -incEmpty
+
+Boolean value (1/0), include or not pairs with empty values.
+Allowed for all 4 methods. Default value is 0.
+
+=item -cutNull
+
+Boolean value (1/0), erase or not simbols with zero code from
+any places, where it needed. Allowed for all 4 methods.
+Default value is 1 and strongly not recommended to change
+this parameter!
+
+=item -maxLoops
+
+This is very important parameter. Defines limit for quantity
+of cycle iterations during parsing query. Usualy quantity of cycle
+iterations is equal to quantity of elements in HTML form,
+or some more. Allowed for all 4 methods. Default value
+for set_GET() and set_COOKIE() methods is 128, and
+for set_POST() and set_MULTI() methods is 256.
+
+=item -maxSize
+
+This method is used for definition maximal valid size in bytes
+for query. If query will have size more then this parameter, then
+this query will be ignored. Allowed for methods set_POST()
+and set_MULTI(). Default value for set_POST() method is 2Mb and
+for set_MULTI() method is 16Mb.
+
+=item -maxKeySize
+
+This method is used for definition maximal valid size in bytes
+for every key of pairs in query. If size of some keys will be
+more that size, then that pairs will be ignored. Allowed for
+methods set_POST() and set_MULTI(). Default value is 128.
+
+=item -maxValSize
+
+This method is used for definition maximal valid size in bytes for
+every value of pairs in query. If size of some values will be more
+that this size, then that values will be cuted off. Allowed for
+methods set_POST() and set_MULTI(). Default value is 256Kb.
+
+=item -maxFiles
+
+This method is used for definition maximal quantity of uploading
+files. Allowed for set_MULTI() method. Defalut value is 16.
+
+Note: For size of files no limits.
+
+=back
+
+=item Access to GET query pairs:
+
+=over 4
+
+=item GET(KEY[,NUMBER])
+
+Method returns value of specific by KEY and NUMBER pair. If NUMBER
+not exists, then default NUMBER zero will be used. If pair not
+exists, then returns empty string.
+
+=item GET_is(KEY[,NUMBER])
+
+Checking for pair existing. All as in previous method, only returns
+boolean (1/0) values. Value "1" if pair exists or "0" if not.
+
+=item GET_size(KEY)
+
+Returns size of array with pairs by using the KEY.
+
+=item GET_keys()
+
+Returns array with all keys.
+
+=back
+
+=item Access to COOKIE's:
+
+=over 4
+
+=item COOKIE(KEY)
+
+All the same as GET() method. Only one difference, - no NUMBER argument.
+
+=item COOKIE_is(KEY)
+
+The same, but without NUMBER argument too.
+
+=item COOKIE_keys()
+
+Returns array with all keys.
+
+=back
+
+=item Access to POST query pairs:
+
+=over 4
+
+=item POST(KEY[,NUMBER])
+
+=item POST_is(KEY[,NUMBER])
+
+=item POST_size(KEY)
+
+=item POST_keys()
+
+All 4 method works the same as methods at GET structure.
+
+=back
+
+=item Access to uploaded with POST(multipart) query files:
+
+=over 4
+
+=item FILE_is(KEY[,NUMBER])
+
+=item FILE_size(KEY)
+
+=item FILE_keys()
+
+This 3 methods works the same as methods at GET or POST structures.
+
+=item FILE(KEY[,NUMBER])->name()
+
+Returns file name if specific file exists. Otherwise returns empty string.
+
+Note: Exists file or not, you can check by FILE_is() method.
+
+=item FILE(KEY[,NUMBER])->base()
+
+Returns base name of file if specific file exists. Otherwise returns
+empty string. Can't contains simbols "/", "\" and ":".
+
+=item FILE(KEY[,NUMBER])->temp()
+
+Returns real path to uploaded file, or empty string if file not exists.
+
+=item FILE(KEY[,NUMBER])->mime()
+
+Returns mime type of file. Can contains anything or nothing ;-)
+
+=item FILE(KEY[,NUMBER])->size()
+
+Size of file or 0 if file not exists or empty.
+
+=back
+
+=item Utilites:
+
+=over 4
+
+=item env(KEY)
+
+Simple wrapper for array %ENV. Only one difference - never returns
+undef value. Can be handle for checking some values. Example:
+
+  if ($cgi->env("REQUEST_METHOD") eq "POST") {
+      # ...
+  }
+
+=item uri_decode(STRING)
+
+URL-formed strings decoder.
+
+=item uri_encode(STRING)
+
+URL-formed strings encoder.
+
+=back
+
+=back
+
+=head1 UTF-8 SUPPORT
+
+Returns only raw data. URL-encoded data in UTF-8 mode (%uXXXX)
+will be decoded correctly.
+
+=head1 EBCDIC SUPPORT
+
+No support. Only ACSII platforms supported.
+
+=head1 REQUIREMENT
+
+This module is required installed module AZ::Splitter version 0.60
+or higher.
+
+=head1 EXAMPLES
+
+=head2 Simple HTML form:
+
+  use AZ::CGI;
+
+  my $cgi = AZ::CGI->new();
+
+  print qq{Content-type: text/html\n\n};
+  print qq{<HTML>\n};
+  print qq{<BODY>\n};
+  print qq{<FORM action="">\n};
+  print qq{<P>Your name: <INPUT type=text name="name"></P>\n};
+  print qq{<P><INPUT type=submit></P>\n};
+  print qq{</FORM>\n};
+  print qq{<P><HR></P>\n};
+
+  if ($cgi->GET_is("name"))
+  {
+      my $name = $cgi->GET("name");
+      print qq{<P>Your name: $name</P>\n};
+  }
+
+  print qq{</BODY>\n};
+  print qq{</HTML>\n};
+
+=head2 File upload:
+
+  use AZ::CGI;
+
+  my $cgi = AZ::CGI->new();
+
+  print qq{Content-type: text/html\n\n};
+  print qq{<HTML>\n};
+  print qq{<BODY>\n};
+  print qq{<FORM action="" method=POST enctype=multipart/form-data>\n};
+  print qq{<P>Select file: <INPUT type=file name="file"></P>\n};
+  print qq{<P><INPUT type=submit></P>\n};
+  print qq{</FORM>\n};
+  print qq{<P><HR></P>\n};
+
+  if ($cgi->FILE_is("file"))
+  {
+      my $base = $cgi->FILE("file")->base();
+      my $temp = $cgi->FILE("file")->temp();
+
+      if (rename($temp,"/path/to/upload/$base"))
+      {
+          print qq{<P>File "$base" has uploaded successfuly!</P>};
+      }
+  }
+
+  print qq{</BODY>\n};
+  print qq{</HTML>\n};
+
+=head2 Printing all pairs from some query (POST for example):
+
+  use AZ::CGI;
+
+  my $cgi = AZ::CGI->new();
+
+  for my $key (sort $cgi->POST_keys()) {
+    for my $number (0..$cgi->POST_size($key))
+    {
+        my $value = $cgi->POST($key,$number);
+        print qq{<P>$key = "$value"</P>\n};
+    }
+  }
+
+=head1 Special thanks too:
+
+Green Kakadu E<lt>gnezdo@gmail.comE<gt>
+
+=head1 AUTHOR
+
+Andrian Zubko aka Ondr, E<lt>ondr@mail.ruE<gt>

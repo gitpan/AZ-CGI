@@ -1,0 +1,10 @@
+Changes
+Makefile.PL
+MANIFEST
+README
+t/AZ-CGI.t
+lib/AZ/CGI.pm
+lib/AZ/CGI.pod
+lib/AZ/CGI/Util.pm
+lib/AZ/CGI/FILE_i.pm
+lib/AZ/CGI/Mhead.pm
