@@ -13,3 +13,6 @@ Revision history for Perl extension AZ::CGI.
 0.71  Tue Mar 01 05:17:00 2005
 	- found some not critical bugs. Fixed
 	- some code optimizations
+
+0.72  Tue Mar 01 08:18:00 2005
+	- found bug in deleting old temporary files. Fixed

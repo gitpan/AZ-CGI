@@ -11,7 +11,7 @@ use AZ::CGI::Util;
 use AZ::CGI::Mhead;
 use AZ::CGI::FILE_i;
 
-our $VERSION = q(0.71);
+our $VERSION = q(0.72);
 
 ##============================================================================##
 ##                                                                            ##
@@ -77,16 +77,17 @@ sub DESTROY
     # Deleting our old undeleted files
     if (not int(rand(50)))
     {
-        my($dh,$file);
+        my($tDir,$tFile,$dh,$file);
         require File::Spec;
-      return unless
-          opendir($dh,File::Spec->tmpdir());
-
+          $tDir = File::Spec->tmpdir();
+        return unless(opendir($dh,$tDir));
         for(;;)
         {
           last unless
               defined($file=readdir($dh));
-            unlink($file) if(-M $file and not index("AZ_CGI",$file));
+            $tFile = File::Spec->catfile($tDir,$file);
+            unlink($tFile) if(
+              -f $tFile and int(-M $tFile) and not index($file,"AZ_CGI"));
         }
         closedir($dh);
     }
